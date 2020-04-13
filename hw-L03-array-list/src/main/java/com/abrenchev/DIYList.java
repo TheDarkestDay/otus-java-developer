@@ -3,6 +3,60 @@ package com.abrenchev;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
+class DIYListIterator<E> implements ListIterator<E> {
+    private DIYList<E> list;
+
+    private int cursor = 0;
+
+    public DIYListIterator(DIYList<E> list) {
+        this.list = list;
+    }
+
+    public boolean hasNext() {
+        throw new UnsupportedOperationException();
+    }
+
+    public E next() {
+        E result = list.get(cursor);
+        cursor++;
+
+        return result;
+    }
+
+    public boolean hasPrevious() {
+        throw new UnsupportedOperationException();
+    }
+
+    public E previous() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int nextIndex() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int previousIndex() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void remove() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void set(E e) {
+        list.set(cursor - 1, e);
+    }
+
+    @Override
+    public void add(E e) {
+        throw new UnsupportedOperationException();
+    }
+}
+
 public class DIYList<T> implements List<T> {
     private final int BUFFER_SIZE = 10;
 
@@ -17,19 +71,35 @@ public class DIYList<T> implements List<T> {
 
         Collections.addAll(list, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
 
-        System.out.println(list.size());
+        if (list.size() != 20) {
+            throw new RuntimeException("List size is wrong");
+        }
         for (int i = 0; i < list.size(); i++) {
-            System.out.println(list.get(i));
+            if (list.get(i) != i + 1) {
+                throw new RuntimeException("addAll messed with the list content");
+            }
         }
 
-        int testArrSize = 10;
+        int testArrSize = 20;
         List<Integer> testArr = new ArrayList<>();
         for (int i = 0; i < testArrSize; i++) {
             testArr.add(ThreadLocalRandom.current().nextInt());
         }
 
-        List<Integer> dest = new DIYList<Integer>(10);
-        Collections.copy(dest, testArr);
+        Collections.copy(list, testArr);
+        for (int i = 0; i < list.size(); i++) {
+            if (!list.get(i).equals(testArr.get(i))) {
+                throw new RuntimeException("Collections.copy messed with the content");
+            }
+        }
+
+        Collections.sort(testArr);
+        Collections.sort(list);
+        for (int i = 0; i < list.size(); i++) {
+            if (!list.get(i).equals(testArr.get(i))) {
+                throw new RuntimeException("Collections.sort works incorrectly");
+            }
+        }
     }
 
     public DIYList(int size) {
@@ -59,7 +129,7 @@ public class DIYList<T> implements List<T> {
     }
 
     public T[] toArray() {
-       throw new UnsupportedOperationException();
+        return (T[]) array;
     }
 
     public <E> E[] toArray(E[] givenArray) {
@@ -139,7 +209,7 @@ public class DIYList<T> implements List<T> {
     }
 
     public ListIterator<T> listIterator() {
-        throw new UnsupportedOperationException();
+        return new DIYListIterator<>(this);
     }
 
     public ListIterator<T> listIterator(int index) {
