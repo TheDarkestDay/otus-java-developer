@@ -86,10 +86,17 @@ public class DIYList<T> implements List<T> {
     }
 
     public T get(int index) {
+        if (index < 0 || index >= size()) {
+            throw new IndexOutOfBoundsException("Invalid index");
+        }
+
         return (T) array[index];
     }
 
     public T set(int index, T element) {
+        if (index < 0 || index >= size()) {
+            throw new IndexOutOfBoundsException("Invalid index");
+        }
         array[index] = element;
 
         return element;

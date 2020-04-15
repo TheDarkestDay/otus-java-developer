@@ -40,5 +40,16 @@ public class App {
                 throw new RuntimeException("Collections.sort works incorrectly");
             }
         }
+
+        try {
+            list.set(testArrSize + 100, 1);
+            throw new RuntimeException("DIYList.set should handle a case of invalid index");
+        } catch (IndexOutOfBoundsException exception) {
+        }
+
+        try {
+            list.get(-1);
+            throw new RuntimeException("DIYList.get should handle a case of invalid index");
+        } catch (IndexOutOfBoundsException exception) {}
     }
 }
