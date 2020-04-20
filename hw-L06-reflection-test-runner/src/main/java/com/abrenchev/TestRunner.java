@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class TestRunner {
-    public static void invokeMehtod(Method method, Object instance) {
+    public static void invokeMethod(Method method, Object instance) {
         try {
             method.invoke(instance);
         } catch (IllegalAccessException | InvocationTargetException exception) {
@@ -16,8 +16,8 @@ public class TestRunner {
         }
     }
 
-    public static void main(String... args) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        Class<?> testClass = Class.forName("com.abrenchev.SampleTest");
+    public TestResults run(String fullClassName) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        Class<?> testClass = Class.forName(fullClassName);
 
         Method[] methods = testClass.getMethods();
         List<Method> beforeMethods = Arrays.stream(methods)
@@ -39,20 +39,20 @@ public class TestRunner {
             Object testInstance = testClass.getDeclaredConstructor().newInstance();
             String testDescription  = testCase.getAnnotation(Test.class).description();
 
+            beforeMethods.forEach(method -> invokeMethod(method, testInstance));
+
             try {
-                beforeMethods.forEach(method -> invokeMehtod(method, testInstance));
                 testCase.invoke(testInstance);
-                afterMethods.forEach(method -> invokeMehtod(method, testInstance));
                 System.out.println(testDescription + " ...OK");
             } catch (Exception exception) {
                 failedTestsCount++;
                 System.err.println(testDescription + "...FAILED");
                 exception.printStackTrace();
             }
+
+            afterMethods.forEach(method -> invokeMethod(method, testInstance));
         }
 
-        System.out.println("DONE");
-        System.out.println("Failed tests: " + failedTestsCount);
-        System.out.println("Total: " + totalTestsCount);
+        return new TestResults(totalTestsCount, failedTestsCount);
     }
 }
