@@ -1,5 +1,8 @@
 package com.abrenchev;
 
+import com.abrenchev.annotations.After;
+import com.abrenchev.annotations.Before;
+import com.abrenchev.annotations.Test;
 
 public class SampleTest {
     private String testString;
