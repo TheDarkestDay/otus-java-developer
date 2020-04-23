@@ -18,7 +18,7 @@ public class TestRunner {
         try {
             return Class.forName(fullClassName);
         } catch (ClassNotFoundException exception) {
-            throw new TestRunnerException("Could not find class: " + fullClassName);
+            throw new TestRunnerException("Could not find class: " + fullClassName, exception);
         }
     }
 
@@ -26,9 +26,9 @@ public class TestRunner {
         try {
             return clazz.getDeclaredConstructor().newInstance();
         } catch (NoSuchMethodException | IllegalAccessException exception) {
-            throw new TestRunnerException("Provided class has no callable constructor");
+            throw new TestRunnerException("Provided class has no callable constructor", exception);
         } catch (InstantiationException exception) {
-            throw new TestRunnerException("Abstract class or interface was provided instead of regular class");
+            throw new TestRunnerException("Abstract class or interface was provided instead of regular class", exception);
         } catch (InvocationTargetException exception) {
             throw new TestRunnerException("An exception occurred inside class constructor", exception);
         }
@@ -37,9 +37,10 @@ public class TestRunner {
     private void invokeMethod(Method method, Object instance) {
         try {
             method.invoke(instance);
-        } catch (IllegalAccessException | InvocationTargetException exception) {
-            System.err.println("Something went wrong with the test runner");
-            exception.printStackTrace();
+        } catch (IllegalAccessException exception) {
+            throw new TestRunnerException("Annotated method is not public", exception);
+        } catch (InvocationTargetException exception) {
+            throw new TestRunnerException("An exception thrown by annotated method", exception);
         }
     }
 
