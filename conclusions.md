@@ -2,17 +2,16 @@
 
 ## Objective
 
-An application was created to solve one particular business task - to log sequence of number to the STDOUT.
-These numbers can be later used by any other systems or external customers.
+An application was created to solve one particular task -
+to demonstrate an example of memory leak and Java program crash with `OutOfMemoryError`.
 
-An objective of this research is to find to most suitable GC for such application.
-
-Considering the typical use case (providing data for external users) of the target system the following params would be considered 
-mainly:
- 1. Latency - how much time is spent for GC work considering the total execution time?
- 2. Overall ability to sustain an application lifetime - for how long an application can be alive until the OOM?
+An objective of this research is to find such GC implementation which would make
+a demo execution time (until the OOM) as low as possible for the sake of better
+viewability and usefulness in educational purpose. 
  
 ## Results
+
+As a part of this research only two GC implementations were considered - SerialGC and G1. Below you can find the testing results.
 
 ### Total time before OOM
 
@@ -67,69 +66,9 @@ mainly:
     </tbody>
 </table>
 
-### Total time spent on GC
-
-<table>
-    <thead>
-        <tr>
-            <th>
-                Test case
-            </th>
-            <th>
-                SerialGC
-            </th>
-            <th>
-                G1
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>
-                256 MB heap size
-            </td>
-            <td>
-                1.8 seconds
-            </td>
-            <td>
-                0.9 seconds
-            </td>
-        </tr>
-        <tr>
-            <td>
-                1024 MB heap size
-            </td>
-            <td>
-                4.9 seconds
-            </td>
-            <td>
-                1.4 seconds
-            </td>
-        </tr>
-        <tr>
-            <td>
-                4GB heap size
-            </td>
-            <td>
-                42 seconds
-            </td>
-            <td>
-                10.6 seconds
-            </td>
-        </tr>
-    </tbody>
-</table>
-
 ## Conclusions
 
-Looks as if SerialGC outperforms G1 on small sized heap - 
-the ratio between total execution time and GC time is somewhere around 50% while
-G1's ratio is about 80%-90%.
+G1 clearly outperforms SerialGC in all of the test cases. Although a 4GB heap size example demonstrates not that significant advantage 
+comparing to the other test cases, however, for educational UX 20 seconds execution time improvement means a lot.
 
-However, this situation changes drastically with an increase of heap size - 
-in the final example of 4 GB heap G1 clearly outperforms SerialGC by spending 
-only roughly 25% of execution time on GC, while SerialGC was busy with it approximately 70% of its execution time.
-
-Taking into account the fact that there will be no hardware heap shortages on the target environment
-(so it will be possible to use quite big maximum heap size) we can conclude that G1
-works best for the specified requirements.
+Taking into account all of the points above we can conclude the G1 GC fits best for the given task.
