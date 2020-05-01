@@ -7,8 +7,6 @@ import java.lang.invoke.CallSite;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.security.ProtectionDomain;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.objectweb.asm.Opcodes.H_INVOKESTATIC;
 
@@ -32,10 +30,12 @@ public class Agent {
                 boolean logAnnotationIsPresent = false;
 
                 String currentMethodName;
+                String currentMethodDesc;
 
-                public MethodAnnotationScanner(String methodName, MethodVisitor mv) {
+                public MethodAnnotationScanner(String methodName, MethodVisitor mv, String methodDesc) {
                     super(Opcodes.ASM8, mv);
                     currentMethodName = methodName;
+                    currentMethodDesc = methodDesc;
                 }
 
                 @Override
@@ -44,18 +44,20 @@ public class Agent {
                         logAnnotationIsPresent = true;
                     }
 
-                    return super.visitAnnotation(desc, visible);
+                    return mv.visitAnnotation(desc, visible);
                 }
 
                 @Override
-                public void visitParameter(String name, int access) {
-
+                public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String desc, boolean isVisible) {
+                    return mv.visitTypeAnnotation(typeRef, typePath, desc, isVisible);
                 }
 
                 @Override
                 public void visitCode() {
                     if (logAnnotationIsPresent) {
                         mv.visitCode();
+
+                        Type[] argumentTypes = Type.getArgumentTypes(currentMethodDesc);
 
                         Handle handle = new Handle(
                                 H_INVOKESTATIC,
@@ -65,9 +67,8 @@ public class Agent {
                                 false);
 
                         mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
-                        mv.visitVarInsn(Opcodes.ALOAD, 1);
-                        mv.visitVarInsn(Opcodes.ALOAD, 2);
-                        mv.visitInvokeDynamicInsn("makeConcatWithConstants", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;", handle, "logged param:\u0001 and \u0001");
+                        insertValuesIntoStack(argumentTypes);
+                        mv.visitInvokeDynamicInsn("makeConcatWithConstants", "(" + getConcatArgumentsSignature(argumentTypes) + ")Ljava/lang/String;", handle, getConcatRecipe(argumentTypes.length));
 
                         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
                     }
@@ -79,12 +80,43 @@ public class Agent {
 
                     mv.visitEnd();
                 }
+
+                private void insertValuesIntoStack(Type[] argumentTypes) {
+                    for (int i = 0; i < argumentTypes.length; i++) {
+                        int valueIndex = i + 1;
+                        switch (argumentTypes[i].getDescriptor()) {
+                            case "I":
+                                mv.visitVarInsn(Opcodes.ILOAD, valueIndex);
+                                break;
+                            case "D":
+                                mv.visitVarInsn(Opcodes.DLOAD, valueIndex);
+                                break;
+                            default:
+                                mv.visitVarInsn(Opcodes.ALOAD, valueIndex);
+                        }
+                    }
+                }
+
+                private String getConcatArgumentsSignature(Type[] types) {
+                    StringBuilder stringBuilder = new StringBuilder();
+
+                    for (Type type : types) {
+                        stringBuilder.append(type.getDescriptor());
+                    }
+
+                    return stringBuilder.toString();
+                }
+
+                private String getConcatRecipe(int argumentsCount) {
+                    return currentMethodName + " called with params: " + "\u0001, ".repeat(Math.max(0, argumentsCount));
+                }
             }
 
             @Override
             public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
                 MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
-                return new MethodAnnotationScanner(name, mv);
+
+                return new MethodAnnotationScanner(name, mv, desc);
             }
         };
 
