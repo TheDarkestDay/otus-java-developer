@@ -4,6 +4,6 @@ public class App {
     public static void main(String... args) {
         SampleClass instance = new SampleClass();
 
-        instance.doSomething("HI", "BOB");
+        instance.doSomething("Bob", "Jack");
     }
 }

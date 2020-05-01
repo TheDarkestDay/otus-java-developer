@@ -66,10 +66,8 @@ public class Agent {
 
                         mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
                         mv.visitVarInsn(Opcodes.ALOAD, 1);
-                        mv.visitInvokeDynamicInsn("makeConcatWithConstants", "(Ljava/lang/String;)Ljava/lang/String;", handle, "logged param:\u0001");
-
-                        mv.visitVarInsn(Opcodes.ALOAD, 1);
-                        mv.visitInvokeDynamicInsn("makeConcatWithConstants", "(Ljava/lang/String;)Ljava/lang/String;", handle, "logged param:\u0001");
+                        mv.visitVarInsn(Opcodes.ALOAD, 2);
+                        mv.visitInvokeDynamicInsn("makeConcatWithConstants", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;", handle, "logged param:\u0001 and \u0001");
 
                         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
                     }
