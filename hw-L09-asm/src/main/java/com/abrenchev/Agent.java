@@ -48,11 +48,6 @@ public class Agent {
                 }
 
                 @Override
-                public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String desc, boolean isVisible) {
-                    return mv.visitTypeAnnotation(typeRef, typePath, desc, isVisible);
-                }
-
-                @Override
                 public void visitCode() {
                     if (logAnnotationIsPresent) {
                         mv.visitCode();
