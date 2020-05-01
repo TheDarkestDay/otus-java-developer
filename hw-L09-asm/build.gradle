@@ -1,0 +1,25 @@
+
+plugins {
+    // Apply the java plugin to add support for Java
+    id 'java'
+    id 'com.github.johnrengelman.shadow'
+}
+
+sourceCompatibility = JavaVersion.VERSION_13
+targetCompatibility = JavaVersion.VERSION_13
+
+dependencies {
+    implementation 'org.ow2.asm:asm-commons'
+}
+
+shadowJar {
+    archiveBaseName.set('hw09asm')
+    archiveVersion.set('0.1')
+    archiveClassifier.set('')
+    manifest {
+        attributes 'Main-Class': 'com.abrenchev.App'
+        attributes 'Premain-Class': 'com.abrenchev.Agent'
+    }
+}
+
+tasks.build.dependsOn tasks.shadowJar
