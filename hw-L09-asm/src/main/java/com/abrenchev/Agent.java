@@ -29,8 +29,8 @@ public class Agent {
             class MethodAnnotationScanner extends MethodVisitor {
                 boolean logAnnotationIsPresent = false;
 
-                String currentMethodName;
-                String currentMethodDesc;
+                final String currentMethodName;
+                final String currentMethodDesc;
 
                 public MethodAnnotationScanner(String methodName, MethodVisitor mv, String methodDesc) {
                     super(Opcodes.ASM8, mv);
