@@ -55,7 +55,7 @@ public class AtmImpl implements Atm {
         }
 
         if (amountToProvide != 0) {
-            throw new AtmWithdrawException();
+            throw new AtmWithdrawException(amount);
         }
 
         return result;
