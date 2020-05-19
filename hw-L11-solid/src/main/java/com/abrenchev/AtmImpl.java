@@ -3,22 +3,19 @@ package com.abrenchev;
 import com.abrenchev.exceptions.AtmWithdrawException;
 import com.abrenchev.interfaces.Atm;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class AtmImpl implements Atm {
-    private TreeMap<Integer, List<Banknote>> banknoteStorage = new TreeMap<>();
+    private Map<BanknoteValue, AtmCell> banknoteStorage = new HashMap<>();
 
     private void addBanknote(Banknote banknote) {
-        int value = banknote.getValue();
+        BanknoteValue value = banknote.getValue();
 
         if (!banknoteStorage.containsKey(value)) {
-            banknoteStorage.put(value, new ArrayList<>());
+            banknoteStorage.put(value, new AtmCell());
         }
 
-        banknoteStorage.get(value).add(banknote);
+        banknoteStorage.get(value).putBanknote(banknote);
     }
 
     public AtmImpl(List<Banknote> initialFunds) {
@@ -29,8 +26,8 @@ public class AtmImpl implements Atm {
     public int getRemainingFunds() {
         int total = 0;
 
-        for (Map.Entry<Integer, List<Banknote>> entry : banknoteStorage.entrySet()) {
-            total += entry.getKey() * entry.getValue().size();
+        for (Map.Entry<BanknoteValue, AtmCell> entry : banknoteStorage.entrySet()) {
+            total += entry.getValue().getRemainingFunds();
         }
 
         return total;
@@ -39,16 +36,19 @@ public class AtmImpl implements Atm {
     @Override
     public List<Banknote> withdraw(int amount) {
         List<Banknote> result = new ArrayList<>();
+        List<Map.Entry<BanknoteValue, AtmCell>> entries = new ArrayList<>(banknoteStorage.entrySet());
+        entries.sort((entryA, entryB) -> entryB.getKey().getNumericValue() - entryA.getKey().getNumericValue());
+
         int amountToProvide = amount;
 
-        for (Map.Entry<Integer, List<Banknote>> entry : banknoteStorage.descendingMap().entrySet()) {
-            List<Banknote> currentBanknotes = entry.getValue();
-            int currentBanknoteValue = entry.getKey();
+        for (Map.Entry<BanknoteValue, AtmCell> entry : entries) {
+            AtmCell currentCell = entry.getValue();
+            int currentBanknoteValue = entry.getKey().getNumericValue();
             int givenBanknotesCount = amountToProvide / currentBanknoteValue;
 
             int i = 0;
-            while (i < givenBanknotesCount && !currentBanknotes.isEmpty()) {
-                result.add(currentBanknotes.remove(0));
+            while (i < givenBanknotesCount && !currentCell.isEmpty()) {
+                result.add(currentCell.takeBanknote());
                 amountToProvide -= currentBanknoteValue;
                 i++;
             }

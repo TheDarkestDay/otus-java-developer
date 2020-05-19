@@ -1,13 +1,13 @@
 package com.abrenchev;
 
 public class Banknote {
-    private int value;
+    private BanknoteValue value;
 
-    public Banknote(int value) {
+    public Banknote(BanknoteValue value) {
         this.value = value;
     }
 
-    public int getValue() {
+    public BanknoteValue getValue() {
         return value;
     }
 }

@@ -2,6 +2,7 @@ package com.abrenchev.testing.services;
 
 import com.abrenchev.AtmImpl;
 import com.abrenchev.Banknote;
+import com.abrenchev.BanknoteValue;
 import com.abrenchev.exceptions.AtmWithdrawException;
 import com.abrenchev.interfaces.Atm;
 import org.junit.jupiter.api.DisplayName;
@@ -19,9 +20,9 @@ public class AtmImplTest {
     public void testRemainingFundsAfterCreation() {
         List<Banknote> banknotes = new ArrayList<>();
 
-        banknotes.add(new Banknote(1000));
-        banknotes.add(new Banknote(500));
-        banknotes.add(new Banknote(100));
+        banknotes.add(new Banknote(BanknoteValue.OneThousand));
+        banknotes.add(new Banknote(BanknoteValue.FiveHundred));
+        banknotes.add(new Banknote(BanknoteValue.OneHundred));
 
         Atm atm = new AtmImpl(banknotes);
 
@@ -33,9 +34,9 @@ public class AtmImplTest {
     public void testWithdrawRemainingAmountDecrease() {
         List<Banknote> banknotes = new ArrayList<>();
 
-        banknotes.add(new Banknote(1000));
-        banknotes.add(new Banknote(500));
-        banknotes.add(new Banknote(100));
+        banknotes.add(new Banknote(BanknoteValue.OneThousand));
+        banknotes.add(new Banknote(BanknoteValue.FiveHundred));
+        banknotes.add(new Banknote(BanknoteValue.OneHundred));
 
         Atm atm = new AtmImpl(banknotes);
         atm.withdraw(600);
@@ -48,17 +49,17 @@ public class AtmImplTest {
     public void testWithdraw() {
         List<Banknote> banknotes = new ArrayList<>();
 
-        banknotes.add(new Banknote(1000));
-        banknotes.add(new Banknote(500));
-        banknotes.add(new Banknote(100));
+        banknotes.add(new Banknote(BanknoteValue.OneThousand));
+        banknotes.add(new Banknote(BanknoteValue.FiveHundred));
+        banknotes.add(new Banknote(BanknoteValue.OneHundred));
 
         Atm atm = new AtmImpl(banknotes);
 
         List<Banknote> result = atm.withdraw(600);
 
         assertThat(result.size()).isEqualTo(2);
-        assertThat(result.get(0).getValue()).isEqualTo(500);
-        assertThat(result.get(1).getValue()).isEqualTo(100);
+        assertThat(result.get(0).getValue().getNumericValue()).isEqualTo(500);
+        assertThat(result.get(1).getValue().getNumericValue()).isEqualTo(100);
     }
 
     @Test()
@@ -66,9 +67,9 @@ public class AtmImplTest {
     public void testWithdrawException() {
         List<Banknote> banknotes = new ArrayList<>();
 
-        banknotes.add(new Banknote(1000));
-        banknotes.add(new Banknote(500));
-        banknotes.add(new Banknote(100));
+        banknotes.add(new Banknote(BanknoteValue.OneThousand));
+        banknotes.add(new Banknote(BanknoteValue.FiveHundred));
+        banknotes.add(new Banknote(BanknoteValue.OneHundred));
 
         Atm atm = new AtmImpl(banknotes);
 
@@ -80,15 +81,15 @@ public class AtmImplTest {
     public void testAddFunds() {
         List<Banknote> banknotes = new ArrayList<>();
 
-        banknotes.add(new Banknote(1000));
-        banknotes.add(new Banknote(500));
-        banknotes.add(new Banknote(100));
+        banknotes.add(new Banknote(BanknoteValue.OneThousand));
+        banknotes.add(new Banknote(BanknoteValue.FiveHundred));
+        banknotes.add(new Banknote(BanknoteValue.OneHundred));
 
         Atm atm = new AtmImpl(banknotes);
 
         List<Banknote> newBanknotes = new ArrayList<>();
-        newBanknotes.add(new Banknote(200));
-        newBanknotes.add(new Banknote(5000));
+        newBanknotes.add(new Banknote(BanknoteValue.TwoHundred));
+        newBanknotes.add(new Banknote(BanknoteValue.FiveThousand));
         atm.addFunds(newBanknotes);
 
         assertThat(atm.getRemainingFunds()).isEqualTo(6800);
