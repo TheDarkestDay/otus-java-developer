@@ -6,49 +6,41 @@ import com.abrenchev.interfaces.Atm;
 import java.util.*;
 
 public class AtmImpl implements Atm {
-    private Map<BanknoteValue, AtmCell> banknoteStorage = new HashMap<>();
+    private AtmState atmState;
+
+    private AtmState initialState;
+
+    private int id;
 
     private void addBanknote(Banknote banknote) {
-        BanknoteValue value = banknote.getValue();
-
-        if (!banknoteStorage.containsKey(value)) {
-            banknoteStorage.put(value, new AtmCell());
-        }
-
-        banknoteStorage.get(value).putBanknote(banknote);
+        atmState.putBanknotes(banknote.getValue(), 1);
     }
 
-    public AtmImpl(List<Banknote> initialFunds) {
-        initialFunds.forEach(this::addBanknote);
+    public AtmImpl(int id, AtmState initialState) {
+        this.id = id;
+        atmState = initialState;
+        this.initialState = initialState.createCopy();
     }
 
     @Override
     public int getRemainingFunds() {
-        int total = 0;
-
-        for (Map.Entry<BanknoteValue, AtmCell> entry : banknoteStorage.entrySet()) {
-            total += entry.getValue().getRemainingFunds();
-        }
-
-        return total;
+        return atmState.getTotalFundsAmount();
     }
 
     @Override
     public List<Banknote> withdraw(int amount) {
         List<Banknote> result = new ArrayList<>();
-        List<Map.Entry<BanknoteValue, AtmCell>> entries = new ArrayList<>(banknoteStorage.entrySet());
-        entries.sort((entryA, entryB) -> entryB.getKey().getNumericValue() - entryA.getKey().getNumericValue());
+        List<BanknoteValue> banknoteValues = atmState.getDescendingBanknoteValues();
 
         int amountToProvide = amount;
 
-        for (Map.Entry<BanknoteValue, AtmCell> entry : entries) {
-            AtmCell currentCell = entry.getValue();
-            int currentBanknoteValue = entry.getKey().getNumericValue();
+        for (BanknoteValue banknoteValue : banknoteValues) {
+            int currentBanknoteValue = banknoteValue.getNumericValue();
             int givenBanknotesCount = amountToProvide / currentBanknoteValue;
 
             int i = 0;
-            while (i < givenBanknotesCount && !currentCell.isEmpty()) {
-                result.add(currentCell.takeBanknote());
+            while (i < givenBanknotesCount && atmState.hasBanknote(banknoteValue)) {
+                result.add(atmState.takeBanknote(banknoteValue));
                 amountToProvide -= currentBanknoteValue;
                 i++;
             }
@@ -64,5 +56,15 @@ public class AtmImpl implements Atm {
     @Override
     public void addFunds(List<Banknote> funds) {
         funds.forEach(this::addBanknote);
+    }
+
+    @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public void reset() {
+        atmState = initialState;
     }
 }

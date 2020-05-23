@@ -1,6 +1,7 @@
 package com.abrenchev.testing.services;
 
 import com.abrenchev.AtmImpl;
+import com.abrenchev.AtmState;
 import com.abrenchev.Banknote;
 import com.abrenchev.BanknoteValue;
 import com.abrenchev.exceptions.AtmWithdrawException;
@@ -18,13 +19,13 @@ public class AtmImplTest {
     @Test()
     @DisplayName("should correctly return remaining funds amount after ATM creation")
     public void testRemainingFundsAfterCreation() {
-        List<Banknote> banknotes = new ArrayList<>();
+        AtmState state = new AtmState();
 
-        banknotes.add(new Banknote(BanknoteValue.OneThousand));
-        banknotes.add(new Banknote(BanknoteValue.FiveHundred));
-        banknotes.add(new Banknote(BanknoteValue.OneHundred));
+        state.putBanknotes(BanknoteValue.OneThousand, 1);
+        state.putBanknotes(BanknoteValue.FiveHundred, 1);
+        state.putBanknotes(BanknoteValue.OneHundred, 1);
 
-        Atm atm = new AtmImpl(banknotes);
+        Atm atm = new AtmImpl(1, state);
 
         assertThat(atm.getRemainingFunds()).isEqualTo(1600);
     }
@@ -32,13 +33,13 @@ public class AtmImplTest {
     @Test()
     @DisplayName("should decrease remaining funds amount after withdraw")
     public void testWithdrawRemainingAmountDecrease() {
-        List<Banknote> banknotes = new ArrayList<>();
+        AtmState state = new AtmState();
 
-        banknotes.add(new Banknote(BanknoteValue.OneThousand));
-        banknotes.add(new Banknote(BanknoteValue.FiveHundred));
-        banknotes.add(new Banknote(BanknoteValue.OneHundred));
+        state.putBanknotes(BanknoteValue.OneThousand, 1);
+        state.putBanknotes(BanknoteValue.FiveHundred, 1);
+        state.putBanknotes(BanknoteValue.OneHundred, 1);
 
-        Atm atm = new AtmImpl(banknotes);
+        Atm atm = new AtmImpl(1, state);
         atm.withdraw(600);
 
         assertThat(atm.getRemainingFunds()).isEqualTo(1000);
@@ -47,13 +48,13 @@ public class AtmImplTest {
     @Test()
     @DisplayName("should withdraw the given amount of funds")
     public void testWithdraw() {
-        List<Banknote> banknotes = new ArrayList<>();
+        AtmState state = new AtmState();
 
-        banknotes.add(new Banknote(BanknoteValue.OneThousand));
-        banknotes.add(new Banknote(BanknoteValue.FiveHundred));
-        banknotes.add(new Banknote(BanknoteValue.OneHundred));
+        state.putBanknotes(BanknoteValue.OneThousand, 1);
+        state.putBanknotes(BanknoteValue.FiveHundred, 1);
+        state.putBanknotes(BanknoteValue.OneHundred, 1);
 
-        Atm atm = new AtmImpl(banknotes);
+        Atm atm = new AtmImpl(1, state);
 
         List<Banknote> result = atm.withdraw(600);
 
@@ -65,13 +66,13 @@ public class AtmImplTest {
     @Test()
     @DisplayName("should throw exception if it's not possible to withdraw the given amount")
     public void testWithdrawException() {
-        List<Banknote> banknotes = new ArrayList<>();
+        AtmState state = new AtmState();
 
-        banknotes.add(new Banknote(BanknoteValue.OneThousand));
-        banknotes.add(new Banknote(BanknoteValue.FiveHundred));
-        banknotes.add(new Banknote(BanknoteValue.OneHundred));
+        state.putBanknotes(BanknoteValue.OneThousand, 1);
+        state.putBanknotes(BanknoteValue.FiveHundred, 1);
+        state.putBanknotes(BanknoteValue.OneHundred, 1);
 
-        Atm atm = new AtmImpl(banknotes);
+        Atm atm = new AtmImpl(1, state);
 
         assertThatThrownBy(() -> atm.withdraw(700)).isInstanceOf(AtmWithdrawException.class);
     }
@@ -79,13 +80,13 @@ public class AtmImplTest {
     @Test()
     @DisplayName("should add new funds")
     public void testAddFunds() {
-        List<Banknote> banknotes = new ArrayList<>();
+        AtmState state = new AtmState();
 
-        banknotes.add(new Banknote(BanknoteValue.OneThousand));
-        banknotes.add(new Banknote(BanknoteValue.FiveHundred));
-        banknotes.add(new Banknote(BanknoteValue.OneHundred));
+        state.putBanknotes(BanknoteValue.OneThousand, 1);
+        state.putBanknotes(BanknoteValue.FiveHundred, 1);
+        state.putBanknotes(BanknoteValue.OneHundred, 1);
 
-        Atm atm = new AtmImpl(banknotes);
+        Atm atm = new AtmImpl(1, state);
 
         List<Banknote> newBanknotes = new ArrayList<>();
         newBanknotes.add(new Banknote(BanknoteValue.TwoHundred));
