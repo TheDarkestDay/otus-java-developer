@@ -66,7 +66,7 @@ public class AtmImpl implements Atm {
 
     @Override
     public void reset() {
-        atmState = initialState;
+        atmState = initialState.createCopy();
     }
 
     @Override
