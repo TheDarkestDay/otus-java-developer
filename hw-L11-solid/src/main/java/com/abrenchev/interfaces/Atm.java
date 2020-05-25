@@ -10,4 +10,5 @@ public interface Atm {
     void addFunds(List<Banknote> funds);
     int getId();
     void reset();
+    void processCommand(AtmCommand command);
 }

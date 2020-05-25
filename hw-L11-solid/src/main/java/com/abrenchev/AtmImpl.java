@@ -2,15 +2,16 @@ package com.abrenchev;
 
 import com.abrenchev.exceptions.AtmWithdrawException;
 import com.abrenchev.interfaces.Atm;
+import com.abrenchev.interfaces.AtmCommand;
 
 import java.util.*;
 
 public class AtmImpl implements Atm {
     private AtmState atmState;
 
-    private AtmState initialState;
+    private final AtmState initialState;
 
-    private int id;
+    private final int id;
 
     private void addBanknote(Banknote banknote) {
         atmState.putBanknotes(banknote.getValue(), 1);
@@ -66,5 +67,10 @@ public class AtmImpl implements Atm {
     @Override
     public void reset() {
         atmState = initialState;
+    }
+
+    @Override
+    public void processCommand(AtmCommand command) {
+        command.execute(this);
     }
 }

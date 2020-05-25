@@ -2,11 +2,15 @@ package com.abrenchev;
 
 import com.abrenchev.interfaces.Atm;
 import com.abrenchev.interfaces.AtmDepartment;
+import com.abrenchev.interfaces.EventListener;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class AtmDepartmentImpl implements AtmDepartment {
     List<Atm> atms = new ArrayList<>();
+
+    List<EventListener> resetListeners = new ArrayList<>();
 
     public int getRemainingFunds() {
         return atms.stream()
@@ -20,10 +24,14 @@ public class AtmDepartmentImpl implements AtmDepartment {
 
     public void addAtm(Atm newAtm) {
         this.atms.add(newAtm);
+
+        resetListeners.add(() -> {
+            newAtm.processCommand(Atm::reset);
+        });
     }
 
     public void resetAtms() {
-        this.atms.forEach(Atm::reset);
+        resetListeners.forEach(EventListener::handle);
     }
 
     public int getAtmsCount() {
