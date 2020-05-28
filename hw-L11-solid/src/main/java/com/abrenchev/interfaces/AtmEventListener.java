@@ -2,5 +2,5 @@ package com.abrenchev.interfaces;
 
 @FunctionalInterface
 public interface AtmEventListener {
-    void handle();
+    void handle(AtmCommand command);
 }

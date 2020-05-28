@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AtmDepartmentImpl implements AtmDepartment, AtmEventSource {
-    List<Atm> atms = new ArrayList<>();
+    private final List<Atm> atms = new ArrayList<>();
 
-    List<AtmEventListener> listeners = new ArrayList<>();
+    private final List<AtmEventListener> listeners = new ArrayList<>();
 
     public int getRemainingFunds() {
         return atms.stream()
@@ -26,11 +26,11 @@ public class AtmDepartmentImpl implements AtmDepartment, AtmEventSource {
     public void addAtm(Atm newAtm) {
         this.atms.add(newAtm);
 
-        this.subscribe(() -> newAtm.processCommand(new AtmResetCommand()));
+        this.subscribe(newAtm::processCommand);
     }
 
     public void resetAtms() {
-        this.listeners.forEach(AtmEventListener::handle);
+        this.listeners.forEach((listener) -> listener.handle(new AtmResetCommand()));
     }
 
     public int getAtmsCount() {
