@@ -8,4 +8,7 @@ public interface Atm {
     int getRemainingFunds();
     List<Banknote> withdraw(int amount);
     void addFunds(List<Banknote> funds);
+    int getId();
+    void reset();
+    void processCommand(AtmCommand command);
 }
