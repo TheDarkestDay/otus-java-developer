@@ -1,29 +1,19 @@
 package com.abrenchev.testing.services;
 
 import com.abrenchev.gson.SimpleGson;
+import com.abrenchev.testing.dummy_classes.Animal;
+import com.abrenchev.testing.dummy_classes.Pizza;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.*;
-
-class Animal {
-    public String name;
-    public int age;
-    public boolean isAdopted;
-
-    public Animal() {
-
-    }
-}
-
-class Pizza {
-    public String name;
-    public String[] ingredients;
-
-    public Pizza() {
-
-    }
-}
 
 @DisplayName("SimpleGson")
 public class SimpleGsonTest {
@@ -86,5 +76,33 @@ public class SimpleGsonTest {
         for (int i = 0; i < parsedPizza.ingredients.length; i++) {
             assertThat(parsedPizza.ingredients[i]).isEqualTo(pepperoni.ingredients[i]);
         }
+    }
+
+    @ParameterizedTest
+    @MethodSource("generateDataForToJsonValuesTest")
+    void testToJsonValues(Object o){
+        Gson gson = new GsonBuilder().serializeNulls().create();
+        SimpleGson simpleGson = new SimpleGson();
+        assertThat(simpleGson.toJson(o)).isEqualTo(gson.toJson(o));
+    }
+
+    private static Stream<Arguments> generateDataForToJsonValuesTest() {
+        return Stream.of(
+                null,
+                Arguments.of(true), Arguments.of(false),
+                Arguments.of((byte)1), Arguments.of((short)2f),
+                Arguments.of(3), Arguments.of(4L), Arguments.of(5f), Arguments.of(6d),
+                Arguments.of("aaa"), Arguments.of('b'),
+                Arguments.of(new boolean[] {false, true}),
+                Arguments.of(new char[] {'a', 'b', 'c'}),
+                Arguments.of(new byte[] {1, 2, 3}),
+                Arguments.of(new short[] {4, 5, 6}),
+                Arguments.of(new int[] {7, 8, 9}),
+                Arguments.of(new long[] {9, 10, 11}),
+                Arguments.of(new float[] {12f, 13f, 14f}),
+                Arguments.of(new double[] {15d, 16d, 17d}),
+                Arguments.of(List.of(18, 19, 20)),
+                Arguments.of(Collections.singletonList(21))
+        );
     }
 }
