@@ -9,7 +9,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
-import java.util.Collections;
 
 public class SimpleGson {
     private final Class<?>[] primitiveTypes = new Class<?>[]{
@@ -49,7 +48,13 @@ public class SimpleGson {
 
         for (Field objField : obj.getClass().getDeclaredFields()) {
             if (!objField.getName().equals("this$0")) {
-                jsonBuilder.add(objField.getName(), getFieldValue(obj, objField));
+                var fieldValue = getFieldValue(obj, objField);
+                jsonBuilder.add(
+                        objField.getName(),
+                        objField.getType().isArray()
+                                ? convertArrayToJson(fieldValue)
+                                : convertPrimitiveValueToJson(fieldValue, fieldValue.getClass())
+                );
             }
         }
 
@@ -130,79 +135,13 @@ public class SimpleGson {
         }
     }
 
-    private int getIntegerValue(Object obj, Field field) {
+    private Object getFieldValue(Object obj, Field field) {
         try {
             field.setAccessible(true);
-            return (int) field.get(obj);
+            return field.get(obj);
         } catch (IllegalAccessException exception) {
-            throw new SimpleGsonException("Could not get an int field of " + field.getName(), exception);
+            throw new SimpleGsonException("Could't get a field content", exception);
         }
-    }
-
-    private boolean getBooleanValue(Object obj, Field field) {
-        try {
-            field.setAccessible(true);
-            return (boolean) field.get(obj);
-        } catch (IllegalAccessException exception) {
-            throw new SimpleGsonException("Could not get a boolean field value of " + field.getName(), exception);
-        }
-    }
-
-    private String getStringValue(Object obj, Field field) {
-        try {
-            field.setAccessible(true);
-            return (String) field.get(obj);
-        } catch (IllegalAccessException exception) {
-            throw new SimpleGsonException("Could not get a string field value of " + field.getName(), exception);
-        }
-    }
-
-    private JsonArray getJsonArray(Object obj, Field field) {
-        try {
-            var arrayBuilder = Json.createArrayBuilder();
-            field.setAccessible(true);
-            var objArray = field.get(obj);
-            var objArrayType = field.getType().getComponentType();
-            var arrayLength = Array.getLength(objArray);
-
-            for (int i = 0; i < arrayLength; i++) {
-                if (objArrayType.equals(Integer.TYPE)) {
-                    arrayBuilder.add(Array.getInt(objArray, i));
-                } else if (objArrayType.equals(Boolean.TYPE)) {
-                    arrayBuilder.add(Array.getBoolean(objArray, i));
-                } else if (objArrayType.equals(String.class)) {
-                    arrayBuilder.add((String) Array.get(objArray, i));
-                } else {
-                    arrayBuilder.add(JsonValue.NULL);
-                }
-            }
-
-            return arrayBuilder.build();
-        } catch (IllegalAccessException exception) {
-            throw new SimpleGsonException("Could not get an array field value of " + field.getName(), exception);
-        }
-    }
-
-    private JsonValue getFieldValue(Object obj, Field field) {
-        Class<?> fieldType = field.getType();
-
-        if (fieldType.equals(Integer.TYPE)) {
-            return Json.createValue(getIntegerValue(obj, field));
-        }
-
-        if (fieldType.equals(Boolean.TYPE)) {
-            return getBooleanValue(obj, field) ? JsonValue.TRUE : JsonValue.FALSE;
-        }
-
-        if (fieldType.equals(String.class)) {
-            return Json.createValue(getStringValue(obj, field));
-        }
-
-        if (fieldType.isArray()) {
-            return getJsonArray(obj, field);
-        }
-
-        return JsonValue.NULL;
     }
 
     private Object createInstance(Class<?> clazz) {
@@ -237,20 +176,28 @@ public class SimpleGson {
             var objArray = Array.newInstance(arrayType, jsonArray.size());
 
             for (int i = 0; i < jsonArray.size(); i++) {
-                if (arrayType.equals(Integer.TYPE)) {
-                    Array.setInt(objArray, i, jsonArray.getInt(i));
-                } else if (arrayType.equals(Boolean.TYPE)) {
-                    Array.setBoolean(objArray, i, jsonArray.getBoolean(i));
-                } else if (arrayType.equals(String.class)) {
-                    Array.set(objArray, i, jsonArray.getString(i));
-                } else {
-                    Array.set(objArray, i, null);
-                }
+                Array.set(objArray, i, getValueFromJsonArray(jsonArray, arrayType, i));
             }
 
             return objArray;
         }
 
         return obj.get(field.getName());
+    }
+
+    private Object getValueFromJsonArray(JsonArray jsonArray, Class<?> componentType, int index) {
+        if (componentType.equals(Integer.TYPE)) {
+            return jsonArray.getInt(index);
+        }
+
+        if (componentType.equals(Boolean.TYPE)) {
+            return jsonArray.getBoolean(index);
+        }
+
+        if (componentType.equals(String.class)) {
+            return jsonArray.getString(index);
+        }
+
+        return null;
     }
 }
