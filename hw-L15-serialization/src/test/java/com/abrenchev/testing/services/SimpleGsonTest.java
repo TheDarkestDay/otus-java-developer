@@ -2,6 +2,7 @@ package com.abrenchev.testing.services;
 
 import com.abrenchev.gson.SimpleGson;
 import com.abrenchev.testing.dummy_classes.Animal;
+import com.abrenchev.testing.dummy_classes.AnimalPizza;
 import com.abrenchev.testing.dummy_classes.Pizza;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -21,14 +22,25 @@ public class SimpleGsonTest {
     @DisplayName("should correctly transform object to JSON string with primitive values")
     public void testToJson() {
         Animal pet = new Animal();
-        pet.name = "Tom";
-        pet.age = 7;
-        pet.isAdopted = true;
+        pet.setName("Tom");
+        pet.setAge(7);
+        pet.setAdopted(true);
 
         Gson gson = new Gson();
         SimpleGson simpleGson = new SimpleGson();
 
         assertThat(simpleGson.toJson(pet)).isEqualTo(gson.toJson(pet));
+    }
+
+    @Test
+    @DisplayName("should correctly transform object to JSON string with various types of values")
+    public void testToJsonVariousValues() {
+        AnimalPizza animalPizza = new AnimalPizza();
+
+        Gson gson = new Gson();
+        SimpleGson simpleGson = new SimpleGson();
+
+        assertThat(simpleGson.toJson(animalPizza)).isEqualTo(gson.toJson(animalPizza));
     }
 
     @Test
@@ -38,17 +50,17 @@ public class SimpleGsonTest {
         SimpleGson simpleGson = new SimpleGson();
         Animal parsedAnimal =  (Animal) simpleGson.fromJson(petJson, Animal.class);
 
-        assertThat(parsedAnimal.name).isEqualTo("Kate");
-        assertThat(parsedAnimal.age).isEqualTo(15);
-        assertThat(parsedAnimal.isAdopted).isEqualTo(false);
+        assertThat(parsedAnimal.getName()).isEqualTo("Kate");
+        assertThat(parsedAnimal.getAge()).isEqualTo(15);
+        assertThat(parsedAnimal.isAdopted()).isEqualTo(false);
     }
 
     @Test
     @DisplayName("should correctly transform arrays of primitive values")
     public void testToJsonPrimitiveArrays() {
         Pizza pepperoni = new Pizza();
-        pepperoni.name = "Pepperoni";
-        pepperoni.ingredients = new String[]{"salami", "cheese", "tomato"};
+        pepperoni.setName("Pepperoni");
+        pepperoni.setIngredients(new String[]{"salami", "cheese", "tomato"});
 
         Gson gson = new Gson();
         SimpleGson simpleGson = new SimpleGson();
@@ -60,8 +72,8 @@ public class SimpleGsonTest {
     @DisplayName("should correctly reads arrays of primitive values")
     public void testFromJsonPrimitiveValues() {
         Pizza pepperoni = new Pizza();
-        pepperoni.name = "Pepperoni";
-        pepperoni.ingredients = new String[]{"salami", "cheese", "tomato"};
+        pepperoni.setName("Pepperoni");
+        pepperoni.setIngredients(new String[]{"salami", "cheese", "tomato"});
 
         Gson gson = new Gson();
 
@@ -70,11 +82,15 @@ public class SimpleGsonTest {
 
         Pizza parsedPizza = (Pizza) simpleGson.fromJson(pizzaJson, Pizza.class);
 
-        assertThat(parsedPizza.name).isEqualTo(pepperoni.name);
-        assertThat(parsedPizza.ingredients.length).isEqualTo(pepperoni.ingredients.length);
+        assertThat(parsedPizza.getName()).isEqualTo(pepperoni.getName());
 
-        for (int i = 0; i < parsedPizza.ingredients.length; i++) {
-            assertThat(parsedPizza.ingredients[i]).isEqualTo(pepperoni.ingredients[i]);
+        var parsedIngredients = parsedPizza.getIngredients();
+        var originalIngredients = pepperoni.getIngredients();
+
+        assertThat(parsedIngredients.length).isEqualTo(originalIngredients.length);
+
+        for (int i = 0; i < parsedPizza.getIngredients().length; i++) {
+            assertThat(parsedIngredients[i]).isEqualTo(originalIngredients[i]);
         }
     }
 

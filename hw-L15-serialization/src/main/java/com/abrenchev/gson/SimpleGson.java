@@ -24,41 +24,7 @@ public class SimpleGson {
     };
 
     public String toJson(Object obj) {
-        if (obj == null) {
-            return JsonValue.NULL.toString();
-        }
-
-        for (Class<?> clazz : primitiveTypes) {
-            if (clazz.isInstance(obj)) {
-                return convertPrimitiveValueToJson(obj, clazz).toString();
-            }
-        }
-
-        if (obj.getClass().isArray()) {
-            return convertArrayToJson(obj).toString();
-        }
-
-        if (Collection.class.isAssignableFrom(obj.getClass())) {
-            var collection = (Collection) obj;
-            var arrayFromCollection = collection.toArray(new Object[0]);
-            return convertArrayToJson(arrayFromCollection).toString();
-        }
-
-        var jsonBuilder = Json.createObjectBuilder();
-
-        for (Field objField : obj.getClass().getDeclaredFields()) {
-            if (!objField.getName().equals("this$0")) {
-                var fieldValue = getFieldValue(obj, objField);
-                jsonBuilder.add(
-                        objField.getName(),
-                        objField.getType().isArray()
-                                ? convertArrayToJson(fieldValue)
-                                : convertPrimitiveValueToJson(fieldValue, fieldValue.getClass())
-                );
-            }
-        }
-
-        return jsonBuilder.build().toString();
+        return toJsonValue(obj).toString();
     }
 
     public Object fromJson(String json, Class<?> clazz) {
@@ -74,12 +40,48 @@ public class SimpleGson {
         return result;
     }
 
+    private JsonValue toJsonValue(Object obj) {
+        if (obj == null) {
+            return JsonValue.NULL;
+        }
+
+        for (Class<?> clazz : primitiveTypes) {
+            if (clazz.isInstance(obj)) {
+                return convertPrimitiveValueToJson(obj, clazz);
+            }
+        }
+
+        if (obj.getClass().isArray()) {
+            return convertArrayToJson(obj);
+        }
+
+        if (Collection.class.isAssignableFrom(obj.getClass())) {
+            var collection = (Collection) obj;
+            var arrayFromCollection = collection.toArray(new Object[0]);
+            return convertArrayToJson(arrayFromCollection);
+        }
+
+        var jsonBuilder = Json.createObjectBuilder();
+
+        for (Field objField : obj.getClass().getDeclaredFields()) {
+            if (!objField.getName().equals("this$0")) {
+                var fieldValue = getFieldValue(obj, objField);
+                jsonBuilder.add(
+                        objField.getName(),
+                        toJsonValue(fieldValue)
+                );
+            }
+        }
+
+        return jsonBuilder.build();
+    }
+
     private JsonArray convertArrayToJson(Object obj) {
         var arrayBuilder = Json.createArrayBuilder();
 
         for (int i = 0; i < Array.getLength(obj); i++) {
             var arrayItem = Array.get(obj, i);
-            arrayBuilder.add(convertPrimitiveValueToJson(arrayItem, arrayItem.getClass()));
+            arrayBuilder.add(toJsonValue(arrayItem));
         }
 
         return arrayBuilder.build();
