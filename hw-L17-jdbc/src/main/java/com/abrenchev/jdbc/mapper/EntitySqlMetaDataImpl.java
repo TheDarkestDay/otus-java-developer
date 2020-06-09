@@ -28,15 +28,11 @@ public class EntitySqlMetaDataImpl implements EntitySQLMetaData {
 
     @Override
     public String getInsertSql() {
-        var fieldsList = new ArrayList<String>();
-        fieldsList.add(idFieldName);
-        fieldsList.addAll(nonIdFields);
-
-        var fieldNames = String.join(",", fieldsList);
+        var fieldNames = String.join(",", nonIdFields);
 
         var wildcardsList = new ArrayList<String>();
 
-        for (int i = 0; i < fieldsList.size(); i++) {
+        for (int i = 0; i < nonIdFields.size(); i++) {
             wildcardsList.add("?");
         }
 
