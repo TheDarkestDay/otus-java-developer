@@ -24,9 +24,9 @@ public class EntityClassMetadataImpl<T> implements EntityClassMetaData<T> {
     @Override
     public Constructor<T> getConstructor() {
         try {
-            return targetClass.getConstructor();
+            return targetClass.getDeclaredConstructor();
         } catch (NoSuchMethodException exception) {
-            throw new EntityClassMetadataException("Could not find a consturctor of class", exception);
+            throw new EntityClassMetadataException("Could not find a constructor of class", exception);
         }
     }
 

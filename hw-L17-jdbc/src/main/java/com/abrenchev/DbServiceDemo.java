@@ -12,8 +12,7 @@ import com.abrenchev.h2.DataSourceH2;
 import com.abrenchev.jdbc.DbExecutorImpl;
 import com.abrenchev.jdbc.dao.AccountMapperDao;
 import com.abrenchev.jdbc.dao.UserMapperDao;
-import com.abrenchev.jdbc.mapper.AccountJdbcMapper;
-import com.abrenchev.jdbc.mapper.UserJdbcMapper;
+import com.abrenchev.jdbc.mapper.*;
 import com.abrenchev.jdbc.sessionmanager.SessionManagerJdbc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +32,9 @@ public class DbServiceDemo {
 
         var sessionManager = new SessionManagerJdbc(dataSource);
         DbExecutorImpl<User> dbExecutor = new DbExecutorImpl<>();
-        var userJdbcMapper = new UserJdbcMapper(sessionManager, dbExecutor);
+        var userMetadata = new EntityClassMetadataImpl<>(User.class);
+        var userSQLMetadata = new EntitySqlMetaDataImpl(userMetadata);
+        var userJdbcMapper = new JdbcMapperImpl<>(sessionManager, dbExecutor, userMetadata, userSQLMetadata);
         var userMapperDao = new UserMapperDao(userJdbcMapper);
 
         var dbServiceUser = new DbServiceUserImpl(userMapperDao);
@@ -46,7 +47,9 @@ public class DbServiceDemo {
         );
 
         DbExecutorImpl<Account> accountDbExecutor = new DbExecutorImpl<>();
-        var accountJdbcMapper = new AccountJdbcMapper(sessionManager, accountDbExecutor);
+        var accountMetadata = new EntityClassMetadataImpl<>(Account.class);
+        var accountSQLMetadata = new EntitySqlMetaDataImpl(accountMetadata);
+        var accountJdbcMapper = new JdbcMapperImpl<>(sessionManager, accountDbExecutor, accountMetadata, accountSQLMetadata);
         var accountMapperDao = new AccountMapperDao(accountJdbcMapper);
         var dbServiceAccount = new DbServiceAccountImpl(accountMapperDao);
         var accountId = dbServiceAccount.saveAccount(new Account(3, "regular", 100));

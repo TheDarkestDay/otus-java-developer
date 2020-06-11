@@ -1,7 +1,9 @@
 package com.abrenchev.jdbc.mapper;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class EntitySqlMetaDataImpl implements EntitySQLMetaData {
     private final String tableName;
@@ -10,10 +12,10 @@ public class EntitySqlMetaDataImpl implements EntitySQLMetaData {
 
     private final List<String> nonIdFields;
 
-    public EntitySqlMetaDataImpl(String tableName, String idFieldName, List<String> nonIdFields) {
-        this.tableName = tableName;
-        this.idFieldName = idFieldName;
-        this.nonIdFields = nonIdFields;
+    public EntitySqlMetaDataImpl(EntityClassMetaData<?> entityClassMetaData) {
+        this.tableName = entityClassMetaData.getName();
+        this.idFieldName = entityClassMetaData.getIdField().getName();
+        this.nonIdFields = entityClassMetaData.getFieldsWithoutId().stream().map(Field::getName).collect(Collectors.toList());
     }
 
     @Override

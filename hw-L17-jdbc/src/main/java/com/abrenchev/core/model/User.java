@@ -8,11 +8,15 @@ import com.abrenchev.jdbc.mapper.annotations.Id;
  */
 public class User {
     @Id
-    private final long id;
+    private long id;
 
-    private final String name;
+    private String name;
 
-    private final int age;
+    private int age;
+
+    public User() {
+
+    }
 
     public User(long id, String name, int age) {
         this.id = id;

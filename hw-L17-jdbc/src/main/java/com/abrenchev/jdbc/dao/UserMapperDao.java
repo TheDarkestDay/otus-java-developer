@@ -4,7 +4,7 @@ import com.abrenchev.core.dao.UserDao;
 import com.abrenchev.core.dao.UserDaoException;
 import com.abrenchev.core.model.User;
 import com.abrenchev.core.sessionmanager.SessionManager;
-import com.abrenchev.jdbc.mapper.UserJdbcMapper;
+import com.abrenchev.jdbc.mapper.JdbcMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,9 +13,9 @@ import java.util.Optional;
 public class UserMapperDao implements UserDao {
     private static final Logger logger = LoggerFactory.getLogger(UserMapperDao.class);
 
-    private final UserJdbcMapper userJdbcMapper;
+    private final JdbcMapper<User> userJdbcMapper;
 
-    public UserMapperDao(UserJdbcMapper userJdbcMapper) {
+    public UserMapperDao(JdbcMapper<User> userJdbcMapper) {
         this.userJdbcMapper = userJdbcMapper;
     }
 

@@ -4,18 +4,21 @@ import com.abrenchev.jdbc.mapper.annotations.Id;
 
 public class Account {
     @Id
-    private final long no;
+    private long no;
 
-    private final String type;
+    private String type;
 
-    private final int rest;
+    private int rest;
+
+    public Account() {
+
+    }
 
     public Account(long no, String type, int rest) {
         this.no = no;
         this.type = type;
         this.rest = rest;
     }
-
 
     public long getNo() {
         return no;
