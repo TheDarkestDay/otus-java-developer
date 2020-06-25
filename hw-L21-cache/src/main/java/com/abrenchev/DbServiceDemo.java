@@ -38,11 +38,11 @@ public class DbServiceDemo {
         var userJdbcMapper = new JdbcMapperImpl<>(sessionManager, dbExecutor, userMetadata, userSQLMetadata);
         var userMapperDao = new UserMapperDao(userJdbcMapper);
 
-        var cache = new MyCache<String, Optional<User>>();
+        var cache = new MyCache<String, User>();
 
-        cache.addListener(new HwListener<String, Optional<User>>() {
+        cache.addListener(new HwListener<String, User>() {
             @Override
-            public void notify(String key, Optional<User> value, CacheEvent action) {
+            public void notify(String key, User value, CacheEvent action) {
                 logger.info("event: {}; key: {}; value: {}", action, key, value);
             }
         });

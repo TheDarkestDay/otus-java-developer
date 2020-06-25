@@ -1,6 +1,5 @@
 package com.abrenchev.cachehw;
 
-import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.WeakHashMap;
@@ -10,7 +9,7 @@ import java.util.WeakHashMap;
  * created on 14.12.18.
  */
 public class MyCache<K, V> implements HwCache<K, V> {
-    private final WeakHashMap<K, SoftReference<V>> storage = new WeakHashMap<>();
+    private final WeakHashMap<K, V> storage = new WeakHashMap<>();
 
     private final List<HwListener<K, V>> listeners = new ArrayList<>();
 
@@ -18,32 +17,26 @@ public class MyCache<K, V> implements HwCache<K, V> {
     public void put(K key, V value) {
         notifyListeners(key, value, CacheEvent.VALUE_ADDED);
 
-        storage.put(key, new SoftReference<>(value));
+        storage.put(key, value);
     }
 
     @Override
     public void remove(K key) {
-        SoftReference<V> valueRef = storage.remove(key);
+        V value = storage.remove(key);
 
-        notifyListeners(key, valueRef.get(), CacheEvent.VALUE_REMOVED);
+        notifyListeners(key, value, CacheEvent.VALUE_REMOVED);
     }
 
     @Override
     public V get(K key) {
-        SoftReference<V> valueRef = storage.get(key);
-        if (valueRef == null) {
+        V value = storage.get(key);
+        if (value == null) {
             notifyListeners(key, null, CacheEvent.CACHE_MISSED);
 
             return null;
         }
 
-        V value = valueRef.get();
-
         notifyListeners(key, value, CacheEvent.VALUE_READ);
-
-        if (value == null) {
-            remove(key);
-        }
 
         return value;
     }

@@ -5,7 +5,6 @@ import com.abrenchev.core.dao.UserDao;
 import com.abrenchev.core.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.Optional;
 
 public class DbServiceUserImpl implements DBServiceUser {
@@ -13,9 +12,9 @@ public class DbServiceUserImpl implements DBServiceUser {
 
     private final UserDao userDao;
 
-    private final HwCache<String, Optional<User>> cache;
+    private final HwCache<String, User> cache;
 
-    public DbServiceUserImpl(UserDao userDao, HwCache cache) {
+    public DbServiceUserImpl(UserDao userDao, HwCache<String, User> cache) {
         this.userDao = userDao;
         this.cache = cache;
     }
@@ -26,7 +25,10 @@ public class DbServiceUserImpl implements DBServiceUser {
             sessionManager.beginSession();
             try {
                 var userId = userDao.insertUser(user);
+                var stringId = String.valueOf(userId);
                 sessionManager.commitSession();
+                user.setId(userId);
+                cache.put(stringId, user);
 
                 logger.info("created user: {}", userId);
                 return userId;
@@ -41,17 +43,18 @@ public class DbServiceUserImpl implements DBServiceUser {
     @Override
     public Optional<User> getUser(long id) {
         String stringId = String.valueOf(id);
-        Optional<User> cachedUser = cache.get(stringId);
+        User cachedUser = cache.get(stringId);
         if (cachedUser != null) {
-            return cachedUser;
+            return Optional.of(cachedUser);
         }
 
         try (var sessionManager = userDao.getSessionManager()) {
             sessionManager.beginSession();
             try {
                 Optional<User> userOptional = userDao.findById(id);
+                User user = userOptional.orElse(null);
                 Thread.sleep(1500);
-                cache.put(stringId, userOptional);
+                cache.put(stringId, user);
 
                 logger.info("user: {}", userOptional.orElse(null));
                 return userOptional;
