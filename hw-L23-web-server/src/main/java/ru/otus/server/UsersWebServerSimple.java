@@ -7,23 +7,23 @@ import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import ru.otus.core.dao.UserDao;
 import ru.otus.helpers.FileSystemHelper;
+import ru.otus.services.DBServiceUser;
 import ru.otus.services.TemplateProcessor;
 import ru.otus.servlet.UsersApiServlet;
-import ru.otus.servlet.UsersServlet;
+import ru.otus.servlet.UsersListServlet;
 
 public class UsersWebServerSimple implements UsersWebServer {
     private static final String START_PAGE_NAME = "index.html";
     private static final String COMMON_RESOURCES_DIR = "static";
 
-    private final UserDao userDao;
+    private final DBServiceUser dbServiceUser;
     private final Gson gson;
     protected final TemplateProcessor templateProcessor;
     private final Server server;
 
-    public UsersWebServerSimple(int port, UserDao userDao, Gson gson, TemplateProcessor templateProcessor) {
-        this.userDao = userDao;
+    public UsersWebServerSimple(int port, DBServiceUser dbServiceUser, Gson gson, TemplateProcessor templateProcessor) {
+        this.dbServiceUser = dbServiceUser;
         this.gson = gson;
         this.templateProcessor = templateProcessor;
         server = new Server(port);
@@ -75,8 +75,8 @@ public class UsersWebServerSimple implements UsersWebServer {
 
     private ServletContextHandler createServletContextHandler() {
         ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        servletContextHandler.addServlet(new ServletHolder(new UsersServlet(templateProcessor, userDao)), "/users");
-        servletContextHandler.addServlet(new ServletHolder(new UsersApiServlet(userDao, gson)), "/api/user/*");
+        servletContextHandler.addServlet(new ServletHolder(new UsersListServlet(templateProcessor, dbServiceUser)), "/users");
+        servletContextHandler.addServlet(new ServletHolder(new UsersApiServlet(dbServiceUser, gson)), "/api/user/*");
         return servletContextHandler;
     }
 }

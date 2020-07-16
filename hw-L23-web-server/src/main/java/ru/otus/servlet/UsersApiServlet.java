@@ -1,38 +1,37 @@
 package ru.otus.servlet;
 
 import com.google.gson.Gson;
-import ru.otus.core.dao.UserDao;
+import ru.otus.core.dto.SaveUserDto;
 import ru.otus.core.model.User;
-import javax.servlet.ServletOutputStream;
+import ru.otus.services.DBServiceUser;
+import ru.otus.services.DbServiceException;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class UsersApiServlet extends HttpServlet {
-
-    private static final int ID_PATH_PARAM_POSITION = 1;
-
-    private final UserDao userDao;
+    private final DBServiceUser dbServiceUser;
     private final Gson gson;
 
-    public UsersApiServlet(UserDao userDao, Gson gson) {
-        this.userDao = userDao;
+    public UsersApiServlet(DBServiceUser dbServiceUser, Gson gson) {
+        this.dbServiceUser = dbServiceUser;
         this.gson = gson;
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        User user = userDao.findById(extractIdFromRequest(request)).orElse(null);
+    protected void doPost(HttpServletRequest req, HttpServletResponse response) throws IOException {
+        String requestBody = req.getReader().readLine();
+        SaveUserDto dto = gson.fromJson(requestBody, SaveUserDto.class);
+        User newUser = new User();
+        newUser.setName(dto.name);
 
-        response.setContentType("application/json;charset=UTF-8");
-        ServletOutputStream out = response.getOutputStream();
-        out.print(gson.toJson(user));
-    }
-
-    private long extractIdFromRequest(HttpServletRequest request) {
-        String[] path = request.getPathInfo().split("/");
-        String id = (path.length > 1)? path[ID_PATH_PARAM_POSITION]: String.valueOf(- 1);
-        return Long.parseLong(id);
+        try {
+            dbServiceUser.saveUser(newUser);
+            response.setStatus(HttpServletResponse.SC_CREATED);
+        } catch (DbServiceException exception) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
     }
 }

@@ -1,4 +1,4 @@
-package ru.otus.core.service;
+package ru.otus.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6,10 +6,11 @@ import ru.otus.core.dao.UserDao;
 import ru.otus.core.model.User;
 import ru.otus.core.sessionmanager.SessionManager;
 
+import java.util.List;
 import java.util.Optional;
 
 public class DbServiceUserImpl implements DBServiceUser {
-    private static Logger logger = LoggerFactory.getLogger(DbServiceUserImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(ru.otus.services.DbServiceUserImpl.class);
 
     private final UserDao userDao;
 
@@ -45,6 +46,23 @@ public class DbServiceUserImpl implements DBServiceUser {
                 Optional<User> userOptional = userDao.findById(id);
 
                 logger.info("user: {}", userOptional.orElse(null));
+                return userOptional;
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+                sessionManager.rollbackSession();
+            }
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Optional<List<User>> getUsers() {
+        try (SessionManager sessionManager = userDao.getSessionManager()) {
+            sessionManager.beginSession();
+            try {
+                Optional<List<User>> userOptional = userDao.findUsers();
+
+                logger.info("user list: {}", userOptional.orElse(null));
                 return userOptional;
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);

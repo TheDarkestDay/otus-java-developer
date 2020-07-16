@@ -15,6 +15,8 @@ import ru.otus.hibernate.dao.UserDaoHibernate;
 import ru.otus.hibernate.sessionmanager.SessionManagerHibernate;
 import ru.otus.server.UsersWebServer;
 import ru.otus.server.UsersWebServerWithBasicSecurity;
+import ru.otus.services.DBServiceUser;
+import ru.otus.services.DbServiceUserImpl;
 import ru.otus.services.TemplateProcessor;
 import ru.otus.services.TemplateProcessorImpl;
 
@@ -22,11 +24,14 @@ import ru.otus.services.TemplateProcessorImpl;
     // Index page
     http://localhost:8080
 
-    // Create new user
+    // Create new user page
     http://localhost:8080/users/create
 
-    // Get list of users
+    // Show all users page
     http://localhost:8080/users/
+
+    // Users REST endpoint
+    http://localhost:8080/api/users/
 */
 public class WebServerWithBasicSecurityDemo {
     private static final int WEB_SERVER_PORT = 8080;
@@ -38,6 +43,7 @@ public class WebServerWithBasicSecurityDemo {
         SessionFactory sessionFactory = HibernateUtils.buildSessionFactory("hibernate.cfg.xml", User.class, Address.class, Phone.class);
         SessionManagerHibernate sessionManager = new SessionManagerHibernate(sessionFactory);
         UserDao userDao = new UserDaoHibernate(sessionManager);
+        DBServiceUser dbServiceUser = new DbServiceUserImpl(userDao);
 
         Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
         TemplateProcessor templateProcessor = new TemplateProcessorImpl(TEMPLATES_DIR);
@@ -46,7 +52,7 @@ public class WebServerWithBasicSecurityDemo {
         LoginService loginService = new HashLoginService(REALM_NAME, hashLoginServiceConfigPath);
 
         UsersWebServer usersWebServer = new UsersWebServerWithBasicSecurity(WEB_SERVER_PORT,
-                loginService, userDao, gson, templateProcessor);
+                loginService, dbServiceUser, gson, templateProcessor);
 
         usersWebServer.start();
         usersWebServer.join();

@@ -2,6 +2,7 @@ package ru.otus.hibernate.dao;
 
 
 import org.hibernate.Session;
+import org.hibernate.criterion.CriteriaQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.otus.core.dao.UserDao;
@@ -11,6 +12,7 @@ import ru.otus.core.sessionmanager.SessionManager;
 import ru.otus.hibernate.sessionmanager.DatabaseSessionHibernate;
 import ru.otus.hibernate.sessionmanager.SessionManagerHibernate;
 
+import java.util.List;
 import java.util.Optional;
 
 public class UserDaoHibernate implements UserDao {
@@ -28,6 +30,22 @@ public class UserDaoHibernate implements UserDao {
         DatabaseSessionHibernate currentSession = sessionManager.getCurrentSession();
         try {
             return Optional.ofNullable(currentSession.getHibernateSession().find(User.class, id));
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<List<User>> findUsers() {
+        DatabaseSessionHibernate currentSession = sessionManager.getCurrentSession();
+        try {
+            var session = currentSession.getHibernateSession();
+            var criteriaBuilder = session.getCriteriaBuilder();
+            var criteria = criteriaBuilder.createQuery(User.class);
+            criteria.from(User.class);
+
+            return Optional.ofNullable(session.createQuery(criteria).getResultList());
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
