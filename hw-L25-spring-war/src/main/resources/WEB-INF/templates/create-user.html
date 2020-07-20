@@ -33,6 +33,9 @@
             },
             body: JSON.stringify({name: nameField.value})
         })
+        .then(() => {
+            window.location = "/app/users";
+        })
         .catch(() => console.log('Something went wrong'))
     });
 </script>
