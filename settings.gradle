@@ -10,4 +10,4 @@
 rootProject.name = 'otus-java-developer'
 include 'hw-L01-gradle', 'hw-L03-array-list', 'L05-test-setup', 'hw-L06-reflection-test-runner', 'hw-L07-gc',
         'hw-L09-asm', 'hw-L11-solid', 'hw-L15-serialization', 'hw-L17-jdbc', 'hw-L19-hibernate', 'hw-L21-cache', 'hw-L23-web-server',
-        'hw-L25-spring-war'
+        'hw-L24-di', 'hw-L25-spring-war'
