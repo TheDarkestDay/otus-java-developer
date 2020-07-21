@@ -15,44 +15,29 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
 
     private final List<Object> appComponents = new ArrayList<>();
     private final Map<String, Object> appComponentsByName = new HashMap<>();
-    private final Object configInstance;
 
     public AppComponentsContainerImpl(Class<?> initialConfigClass) {
-        configInstance = createInstance(initialConfigClass);
         processConfig(initialConfigClass);
     }
 
     private void processConfig(Class<?> configClass) {
         checkConfigClass(configClass);
 
+        Object configInstance = createInstance(configClass);
+
         List<Method> factories = Arrays
                 .stream(configClass.getDeclaredMethods())
                 .filter(method -> method.isAnnotationPresent(AppComponent.class))
-                .sorted((factoryA, factoryB) -> {
-                    int orderA = factoryA.getAnnotation(AppComponent.class).order();
-                    int orderB = factoryB.getAnnotation(AppComponent.class).order();
-
-                    return orderA - orderB;
-                })
+                .sorted(Comparator.comparingInt(method -> method.getAnnotation(AppComponent.class).order()))
                 .collect(Collectors.toList());
 
         factories.forEach(factory -> {
             List<Class<?>> factoryArgTypes = Arrays.asList(factory.getParameterTypes());
             List<Object> factoryArgs = factoryArgTypes.stream()
-                    .map(factoryArgType -> {
-                        Object factoryArg = appComponents.get(0);
-                        for (Object resolvedDep : appComponents) {
-                            if (factoryArgType.isInstance(resolvedDep)) {
-                                factoryArg = resolvedDep;
-                                break;
-                            }
-                        }
-
-                        return factoryArg;
-                    })
+                    .map(this::getAppComponent)
                     .collect(Collectors.toList());
 
-            Object newDep = invokeFactory(factory, factoryArgs);
+            Object newDep = invokeFactory(configInstance, factory, factoryArgs);
             appComponents.add(newDep);
 
             String depName = factory.getAnnotation(AppComponent.class).name();
@@ -74,9 +59,9 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
         }
     }
 
-    private Object invokeFactory(Method factory, List<Object> deps) {
+    private Object invokeFactory(Object object, Method factory, List<Object> deps) {
         try {
-            return factory.invoke(configInstance, deps.toArray());
+            return factory.invoke(object, deps.toArray());
         } catch (IllegalAccessException | InvocationTargetException exception) {
             throw new AppContainerException("An exception occurred during factory execution", exception);
         }
@@ -84,11 +69,13 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
 
     @Override
     public <C> C getAppComponent(Class<C> componentClass) {
-        Object result = appComponents.get(0);
-        for (Object resolvedDep : appComponents) {
-            if (componentClass.isInstance(resolvedDep)) {
-                result = resolvedDep;
-            }
+        var result = appComponents.stream()
+                .filter(resolvedDep -> componentClass.isInstance(resolvedDep))
+                .findFirst()
+                .orElse(null);
+
+        if (result == null) {
+            throw new AppContainerException("Could not find dependency for class: " + componentClass.getCanonicalName());
         }
 
         return (C) result;
