@@ -72,11 +72,7 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
         var result = appComponents.stream()
                 .filter(resolvedDep -> componentClass.isInstance(resolvedDep))
                 .findFirst()
-                .orElse(null);
-
-        if (result == null) {
-            throw new AppContainerException("Could not find dependency for class: " + componentClass.getCanonicalName());
-        }
+                .orElseThrow(() -> new AppContainerException("Could not find dependency for class: " + componentClass.getCanonicalName()));
 
         return (C) result;
     }
