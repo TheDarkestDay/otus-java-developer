@@ -13,7 +13,7 @@ public class UserController {
         this.dbServiceUser = dbServiceUser;
     }
 
-    @GetMapping("/users")
+    @GetMapping("/")
     public String usersListView(Model model) {
         dbServiceUser.getUsers().ifPresent(foundUsers -> model.addAttribute("users", foundUsers));
 

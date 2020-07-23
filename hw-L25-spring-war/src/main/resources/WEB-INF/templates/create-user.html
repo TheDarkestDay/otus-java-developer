@@ -17,6 +17,10 @@
             </label>
             <input id="name" type="text">
         </p>
+
+        <button type="submit">
+            Create
+        </button>
     </form>
 </section>
 <script>
@@ -34,7 +38,7 @@
             body: JSON.stringify({name: nameField.value})
         })
         .then(() => {
-            window.location = "/app/users";
+            window.location = "/app/";
         })
         .catch(() => console.log('Something went wrong'))
     });

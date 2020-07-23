@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Service
 public class DbServiceUserImpl implements DBServiceUser {
-    private static Logger logger = LoggerFactory.getLogger(ru.otus.services.DbServiceUserImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(ru.otus.services.DbServiceUserImpl.class);
 
     private final UserDao userDao;
 
