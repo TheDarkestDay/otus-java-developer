@@ -10,8 +10,8 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import ru.otus.helpers.FileSystemHelper;
 import ru.otus.services.DBServiceUser;
 import ru.otus.services.TemplateProcessor;
-import ru.otus.servlet.UsersApiServlet;
-import ru.otus.servlet.UsersListServlet;
+import ru.otus.controllers.UsersApiServlet;
+import ru.otus.controllers.UsersListServlet;
 
 public class UsersWebServerSimple implements UsersWebServer {
     private static final String START_PAGE_NAME = "index.html";

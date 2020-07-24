@@ -1,4 +1,4 @@
-package ru.otus.servlet;
+package ru.otus.controllers;
 
 import ru.otus.services.DBServiceUser;
 import ru.otus.services.TemplateProcessor;

@@ -1,4 +1,4 @@
-package ru.otus.servlet;
+package ru.otus.controllers;
 
 import com.google.gson.Gson;
 import ru.otus.core.dto.SaveUserDto;

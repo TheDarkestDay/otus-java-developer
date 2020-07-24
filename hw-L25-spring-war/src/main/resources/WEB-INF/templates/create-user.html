@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<section>
+    <h1>
+        Create new user
+    </h1>
+
+    <form>
+        <p>
+            <label for="name">
+                Name:
+            </label>
+            <input id="name" type="text">
+        </p>
+
+        <button type="submit">
+            Create
+        </button>
+    </form>
+</section>
+<script>
+    const form = document.querySelector('form');
+    const nameField = document.querySelector('#name');
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        fetch('/app/api/user', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({name: nameField.value})
+        })
+        .then(() => {
+            window.location = "/app/";
+        })
+        .catch(() => console.log('Something went wrong'))
+    });
+</script>
+</body>
+</html>
